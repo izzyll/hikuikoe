@@ -58,7 +58,7 @@
       {
         "provider": "github",
         "owner": "izzyll",
-        "repo": "in-co",
+        "repo": "hikuikoe",
         "releaseType": "release"
       }
     ]
@@ -70,5 +70,5 @@
       "!**/*.map"
     ]
   },
-  "repository": "github:izzyll/in-co"
+  "repository": "github:izzyll/hikuikoe"
 }

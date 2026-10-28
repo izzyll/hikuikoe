@@ -11,7 +11,7 @@ The name is Japanese: *hikui koe* (低い声) means "low voice", like someone wh
   <img src="docs/screenshots/context-es.png" width="360" alt="Context view: meeting topic and indexed documents" />
 </p>
 
-**[Download for Windows](https://github.com/izzyll/in-co/releases/latest/download/HikuiKoe-Setup.exe)** · [All releases](https://github.com/izzyll/in-co/releases)
+**[Download for Windows](https://github.com/izzyll/hikuikoe/releases/latest/download/HikuiKoe-Setup.exe)** · [All releases](https://github.com/izzyll/hikuikoe/releases)
 
 ## What it does
 
@@ -30,7 +30,7 @@ The name is Japanese: *hikui koe* (低い声) means "low voice", like someone wh
 
 ## Installation
 
-1. Download and install [HikuiKoe-Setup.exe](https://github.com/izzyll/in-co/releases/latest/download/HikuiKoe-Setup.exe) (Windows 10 2004+ / 11).
+1. Download and install [HikuiKoe-Setup.exe](https://github.com/izzyll/hikuikoe/releases/latest/download/HikuiKoe-Setup.exe) (Windows 10 2004+ / 11).
 2. Install [Ollama](https://ollama.com) and open it.
 3. `ollama pull nomic-embed-text` (always) and `ollama pull qwen2.5:7b` (only if you'll answer locally).
 4. Optional: create a free API key on Groq for near-instant answers and transcription.
@@ -75,7 +75,7 @@ git push origin v0.2.0
 
 The workflow takes the version from the tag, builds the installer on Windows and publishes it as a release with `HikuiKoe-Setup.exe`.
 Since the file name has no version in it, this link always points to the latest one:
-`https://github.com/izzyll/in-co/releases/latest/download/HikuiKoe-Setup.exe`.
+`https://github.com/izzyll/hikuikoe/releases/latest/download/HikuiKoe-Setup.exe`.
 
 The installer is not signed: Windows SmartScreen will show a warning the first time ("More info → Run anyway").
 
