@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "es2022",
+    "lib": ["ES2023"],
+    "types": ["audioworklet"],
+    "rootDir": ".",
+    "outDir": "../../out/renderer",
+    "tsBuildInfoFile": "../../out/renderer/worklet.tsbuildinfo"
+  },
+  "files": ["audio-processor.ts"]
+}

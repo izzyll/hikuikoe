@@ -1,0 +1,74 @@
+{
+  "name": "hikui-koe",
+  "productName": "Hikui Koe",
+  "version": "0.1.0",
+  "description": "Asistente en tiempo real para presentaciones, reuniones y entrevistas: transcribe el audio de la reunión y sugiere respuestas basadas en tus documentos (RAG).",
+  "main": "out/main.js",
+  "author": "Diego Godoy",
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "tsc -b",
+    "start": "tsc -b && electron .",
+    "dist": "tsc -b && electron-builder --win nsis",
+    "dev": "tsc -b && concurrently -k -n tsc,app \"tsc -b -w --preserveWatchOutput\" \"electronmon .\"",
+    "dev:protect": "tsc -b && concurrently -k -n tsc,app \"tsc -b -w --preserveWatchOutput\" \"electronmon . --protect\"",
+    "release": "tsc -b && electron-builder --win nsis --publish always"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "^3.8.1",
+    "mammoth": "^1.13.0",
+    "pdf-parse": "^1.1.1"
+  },
+  "devDependencies": {
+    "@types/audioworklet": "^0.0.100",
+    "@types/node": "^22.20.5",
+    "@types/pdf-parse": "^1.1.5",
+    "concurrently": "^10.0.6",
+    "electron": "^45.0.0",
+    "electron-builder": "^26.18.0",
+    "electronmon": "^2.0.4",
+    "typescript": "^7.0.2"
+  },
+  "build": {
+    "appId": "dev.diego.interviewcopilot",
+    "productName": "Hikui Koe",
+    "files": [
+      "out/**/*",
+      "!out/**/*.{map,tsbuildinfo,d.ts}",
+      "src/renderer/*.{html,css}",
+      "package.json",
+      "node_modules/**/*",
+      "!node_modules/onnxruntime-node/**",
+      "!node_modules/sharp/**",
+      "!node_modules/@img/**"
+    ],
+    "asarUnpack": [
+      "node_modules/@huggingface/transformers/dist/*.wasm",
+      "node_modules/@huggingface/transformers/dist/*.mjs"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "HikuiKoe-Setup.${ext}"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "izzyll",
+        "repo": "in-co",
+        "releaseType": "release"
+      }
+    ]
+  },
+  "electronmon": {
+    "patterns": [
+      "!src/**/*.ts",
+      "!**/*.tsbuildinfo",
+      "!**/*.map"
+    ]
+  },
+  "repository": "github:izzyll/in-co"
+}

@@ -1,0 +1,13 @@
+// UI (DOM). El worker de Whisper y el audio worklet tienen otros globals y van en sus propios proyectos.
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "es2022",
+    "moduleResolution": "bundler",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "types": [],
+    "rootDir": ".",
+    "outDir": "../../out/renderer"
+  },
+  "files": ["renderer.ts", "../types.d.ts"]
+}

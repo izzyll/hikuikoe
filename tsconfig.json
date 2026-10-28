@@ -1,0 +1,18 @@
+// Proceso principal y preload (Node, CommonJS). `tsc -b` compila también los proyectos del renderer.
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "module": "nodenext",
+    "lib": ["ES2023"],
+    "types": ["node"],
+    "rootDir": "src",
+    "outDir": "out",
+    "tsBuildInfoFile": "out/tsconfig.tsbuildinfo"
+  },
+  "include": ["src/*.ts"],
+  "references": [
+    { "path": "src/renderer/tsconfig.json" },
+    { "path": "src/renderer/tsconfig.worker.json" },
+    { "path": "src/renderer/tsconfig.worklet.json" }
+  ]
+}

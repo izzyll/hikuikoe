@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' blob:; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; connect-src 'self' blob: data: hfcache:" />
+  <title>Hikui Koe</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="shell">
+    <header class="titlebar">
+      <span id="status-dot" class="dot" title="Estado"></span>
+      <span class="title">Hikui Koe</span>
+      <span id="status-text" class="status-text">Detenido</span>
+      <div class="spacer"></div>
+      <button id="listen-btn" class="btn primary small" title="Ctrl+Shift+L">Escuchar</button>
+      <button id="min-btn" class="icon-btn" title="Ocultar (Ctrl+Shift+H)">–</button>
+      <button id="close-btn" class="icon-btn" title="Salir">×</button>
+    </header>
+
+    <nav class="tabs">
+      <button class="tab active" data-tab="live">En vivo</button>
+      <button class="tab" data-tab="profile">Contexto</button>
+      <button class="tab" data-tab="settings">Ajustes</button>
+    </nav>
+
+    <section id="tab-live" class="panel active">
+      <div class="label-row">
+        <span id="transcript-label" class="label">Participantes</span>
+        <button id="clear-btn" class="link" title="Ctrl+Shift+K">limpiar</button>
+      </div>
+      <div id="transcript" class="transcript"><p class="muted">Presiona “Escuchar” y comparte el audio del sistema.</p></div>
+
+      <div class="label-row">
+        <span class="label">Respuesta sugerida</span>
+        <button id="answer-btn" class="link" title="Ctrl+Shift+Space">responder ahora</button>
+      </div>
+      <div id="answer" class="answer"><p class="muted">Aquí aparecerá la respuesta cuando detecte una pregunta.</p></div>
+
+      <div class="label-row">
+        <span class="label">Registro</span>
+        <span>
+          <button id="log-clear-btn" class="link">limpiar</button>
+          <button id="log-toggle-btn" class="link">ocultar</button>
+        </span>
+      </div>
+      <div id="log" class="log"></div>
+
+      <form id="ask-form" class="ask">
+        <input id="ask-input" placeholder="Escribe una pregunta manualmente…" autocomplete="off" />
+      </form>
+    </section>
+
+    <section id="tab-profile" class="panel">
+      <label class="field">
+        <span>Modo</span>
+        <select id="cfg-mode">
+          <option value="presentation">Presentación / reunión</option>
+          <option value="interview">Entrevista de trabajo</option>
+        </select>
+      </label>
+      <label class="field">
+        <span id="topic-label"></span>
+        <input id="cfg-topic" />
+      </label>
+
+      <div class="label-row">
+        <span class="label">Documentos indexados</span>
+        <button id="add-files-btn" class="btn small">+ Archivos</button>
+      </div>
+      <ul id="docs-list" class="docs"></ul>
+      <p id="rag-progress" class="muted small"></p>
+
+      <label class="field">
+        <span id="paste-label"></span>
+        <input id="paste-name" placeholder="Nombre del documento" />
+        <textarea id="paste-text" rows="6"></textarea>
+      </label>
+      <button id="paste-btn" class="btn small">Indexar texto</button>
+    </section>
+
+    <section id="tab-settings" class="panel">
+      <div id="ollama-status" class="notice"></div>
+
+      <label class="field">
+        <span>Proveedor de respuestas</span>
+        <select id="cfg-provider">
+          <option value="ollama">Ollama (local, privado)</option>
+          <option value="groq">Groq (nube, gratis, muy rápido)</option>
+          <option value="cerebras">Cerebras (nube, gratis, muy rápido)</option>
+          <option value="custom">Personalizado (compatible OpenAI)</option>
+        </select>
+      </label>
+
+      <div id="api-fields" class="group">
+        <label class="field" id="custom-url-field"><span>URL base</span><input id="cfg-customBaseUrl" placeholder="https://.../v1" /></label>
+        <label class="field">
+          <span>API key <button type="button" id="get-key-link" class="link">obtener gratis</button></span>
+          <input id="api-key" type="password" autocomplete="off" />
+        </label>
+        <label class="field"><span>Modelo</span><input id="api-model" list="api-models" /></label>
+        <datalist id="api-models"></datalist>
+        <p class="muted small">Se envían a la nube la transcripción y los fragmentos de tu perfil relevantes a cada pregunta.</p>
+      </div>
+
+      <div class="label-row">
+        <button id="test-llm-btn" class="btn small">Probar velocidad</button>
+        <span id="test-llm-result" class="muted small"></span>
+      </div>
+
+      <label class="field"><span>URL de Ollama</span><input id="cfg-ollamaUrl" /></label>
+      <label class="field" id="ollama-chat-field"><span>Modelo de respuesta (Ollama)</span><input id="cfg-chatModel" list="ollama-models" /></label>
+      <label class="field"><span>Modelo de embeddings (Ollama, siempre local)</span><input id="cfg-embedModel" list="ollama-models" /></label>
+      <datalist id="ollama-models"></datalist>
+
+      <label class="field">
+        <span>Transcripción</span>
+        <select id="cfg-sttProvider">
+          <option value="groq">Groq whisper-large-v3-turbo (nube, ~0.3 s, usa la key de Groq)</option>
+          <option value="local">Whisper local (GPU, privado, más lento)</option>
+        </select>
+      </label>
+      <label class="field" id="local-whisper-field">
+        <span>Modelo de transcripción local (Whisper)</span>
+        <select id="cfg-whisperModel">
+          <option value="onnx-community/whisper-base">whisper-base (rápido)</option>
+          <option value="onnx-community/whisper-small">whisper-small (recomendado)</option>
+          <option value="onnx-community/whisper-large-v3-turbo">whisper-large-v3-turbo (preciso, GPU)</option>
+        </select>
+      </label>
+      <label class="field">
+        <span>Idioma de la reunión</span>
+        <select id="cfg-language">
+          <option value="spanish">Español</option>
+          <option value="english">Inglés</option>
+          <option value="">Detectar automáticamente</option>
+        </select>
+      </label>
+
+      <label class="check"><input type="checkbox" id="cfg-autoAnswer" /> Responder automáticamente al detectar una pregunta</label>
+
+      <label class="field">
+        <span>Opacidad</span>
+        <input type="range" id="cfg-opacity" min="0.4" max="1" step="0.02" />
+      </label>
+      <label class="field">
+        <span>Instrucciones extra para el modelo</span>
+        <textarea id="cfg-extraInstructions" rows="3" placeholder="Ej: responde con un tono cercano, menciona siempre métricas"></textarea>
+      </label>
+
+      <p class="muted small">
+        Atajos: <b>Ctrl+Shift+H</b> mostrar/ocultar · <b>Ctrl+Shift+L</b> escuchar ·
+        <b>Ctrl+Shift+Space</b> responder · <b>Ctrl+Shift+K</b> limpiar
+      </p>
+    </section>
+  </div>
+
+  <script type="module" src="../../out/renderer/renderer.js"></script>
+</body>
+</html>

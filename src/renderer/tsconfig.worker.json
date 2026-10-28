@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "es2022",
+    "moduleResolution": "bundler",
+    "lib": ["ES2023", "WebWorker"],
+    "types": [],
+    "rootDir": ".",
+    "outDir": "../../out/renderer",
+    "tsBuildInfoFile": "../../out/renderer/worker.tsbuildinfo"
+  },
+  "files": ["whisper-worker.ts", "../types.d.ts"]
+}
