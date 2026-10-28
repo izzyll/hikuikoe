@@ -22,6 +22,9 @@ jobs:
       # La versión del instalador sale del tag (v0.2.0 → 0.2.0), así no hay que editar package.json a mano.
       - run: npm version "${GITHUB_REF_NAME#v}" --no-git-tag-version --allow-same-version
         shell: bash
-      - run: npm run release
+      # electron-builder solo compila: al publicar sube los archivos en paralelo y puede crear releases duplicados.
+      - run: npm run dist
+      - run: gh release create "$GITHUB_REF_NAME" dist/HikuiKoe-Setup.exe dist/HikuiKoe-Setup.exe.blockmap dist/latest.yml --title "$GITHUB_REF_NAME" --generate-notes
+        shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
