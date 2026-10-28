@@ -10,6 +10,7 @@
     "build": "tsc -b",
     "start": "tsc -b && electron .",
     "dist": "tsc -b && electron-builder --win nsis",
+    "dist:mac": "tsc -b && electron-builder --mac dmg --arm64 --x64",
     "dev": "tsc -b && concurrently -k -n tsc,app \"tsc -b -w --preserveWatchOutput\" \"electronmon .\"",
     "dev:protect": "tsc -b && concurrently -k -n tsc,app \"tsc -b -w --preserveWatchOutput\" \"electronmon . --protect\"",
     "release": "tsc -b && electron-builder --win nsis --publish always"
@@ -48,6 +49,17 @@
     ],
     "win": {
       "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.productivity",
+      "identity": "-",
+      "artifactName": "HikuiKoe-mac-${arch}.${ext}",
+      "extendInfo": {
+        "LSUIElement": true,
+        "NSScreenCaptureUsageDescription": "Hikui Koe captura el audio del sistema para transcribir la reunión.",
+        "NSAudioCaptureUsageDescription": "Hikui Koe captura el audio del sistema para transcribir la reunión."
+      }
     },
     "nsis": {
       "oneClick": false,

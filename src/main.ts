@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, globalShortcut, desktopCapturer, session, dialog, screen, shell } from 'electron';
+import { app, BrowserWindow, ipcMain, globalShortcut, desktopCapturer, session, dialog, screen, shell, systemPreferences } from 'electron';
 import fs from 'fs';
 import path from 'path';
 import * as settings from './settings';
@@ -17,6 +17,10 @@ let win!: BrowserWindow;
 // `npm run dev:protect` (flag --protect) arranca dev con la protección activa, como en producción.
 const isDev = !app.isPackaged;
 let contentProtection = !isDev || process.argv.includes('--protect');
+
+const isMac = process.platform === 'darwin';
+// En macOS el audio 'loopback' de getDisplayMedia necesita este flag de Chromium (ScreenCaptureKit, macOS 13+).
+if (isMac) app.commandLine.appendSwitch('enable-features', 'MacLoopbackAudioForScreenShare');
 
 // La app se llamó "Interview Copilot" y "Meeting Copilot". Si hay datos con un nombre anterior se sigue usando esa
 // carpeta en vez de moverlos: el "Local State" de Chromium guarda la clave con la que safeStorage cifró las API keys,
@@ -54,8 +58,8 @@ function createWindow() {
     resizable: true,
     alwaysOnTop: true,
     skipTaskbar: true,
-    // "toolbar" la oculta también de Alt+Tab en Windows.
-    type: 'toolbar',
+    // "toolbar" la oculta también de Alt+Tab en Windows; en macOS "panel" flota sobre apps en pantalla completa.
+    type: isMac ? 'panel' : 'toolbar',
     backgroundColor: '#00000000',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -68,7 +72,7 @@ function createWindow() {
   // En Windows 10 2004+ usa WDA_EXCLUDEFROMCAPTURE: la ventana no aparece en el video compartido.
   win.setContentProtection(contentProtection);
   win.setAlwaysOnTop(true, 'screen-saver');
-  win.setVisibleOnAllWorkspaces(true);
+  win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
 
   log.setTarget(win.webContents);
   if (isDev) win.webContents.on('did-finish-load', () => setContentProtection(contentProtection));
@@ -94,12 +98,18 @@ app.whenReady().then(() => {
   // getDisplayMedia() en el renderer devuelve el audio del sistema (loopback de Windows):
   // todo lo que suena por los parlantes/audífonos, es decir, la voz de los demás participantes en Meet.
   session.defaultSession.setDisplayMediaRequestHandler(async (_request, callback) => {
+    // macOS pide el permiso la primera vez; si se negó, la captura falla sin decir por qué.
+    if (isMac && systemPreferences.getMediaAccessStatus('screen') === 'denied') {
+      log.error('Audio', 'sin permiso: Ajustes del Sistema → Privacidad y seguridad → Grabación de pantalla y audio del sistema → activar Hikui Koe y reiniciar la app');
+    }
     const sources = await desktopCapturer.getSources({ types: ['screen'] });
     callback({ video: sources[0], audio: 'loopback' });
   });
 
   hfCache.handle((progress) => win && win.webContents.send('model:progress', progress));
 
+  // skipTaskbar no aplica en macOS: lo equivalente es no mostrar el ícono en el Dock.
+  if (isMac) app.dock?.hide();
   createWindow();
   registerShortcuts();
 });

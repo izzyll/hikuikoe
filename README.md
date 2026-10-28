@@ -26,11 +26,16 @@ The name is Japanese: *hikui koe* (低い声) means "low voice", like someone wh
   - Answers: local Ollama or very fast APIs with a free tier: [Groq](https://console.groq.com/keys),
     [Cerebras](https://cloud.cerebras.ai) or any OpenAI-compatible API.
   - Documents are indexed locally (`nomic-embed-text` in Ollama); only the transcript and the relevant
-    chunks go to the cloud. API keys are stored encrypted with DPAPI.
+    chunks go to the cloud. API keys are stored encrypted with DPAPI (Windows) or the Keychain (macOS).
 
 ## Installation
 
-1. Download and install [HikuiKoe-Setup.exe](https://github.com/izzyll/hikuikoe/releases/latest/download/HikuiKoe-Setup.exe) (Windows 10 2004+ / 11).
+1. Download and install the app:
+   - **Windows** (10 2004+ / 11): [HikuiKoe-Setup.exe](https://github.com/izzyll/hikuikoe/releases/latest/download/HikuiKoe-Setup.exe)
+   - **macOS** (13+, experimental): [Apple Silicon](https://github.com/izzyll/hikuikoe/releases/latest/download/HikuiKoe-mac-arm64.dmg) · [Intel](https://github.com/izzyll/hikuikoe/releases/latest/download/HikuiKoe-mac-x64.dmg).
+     The app is not signed by Apple: after dragging it to Applications, run
+     `xattr -cr "/Applications/Hikui Koe.app"` in Terminal, then allow it in
+     System Settings → Privacy & Security → *Screen & System Audio Recording*.
 2. Install [Ollama](https://ollama.com) and open it.
 3. `ollama pull nomic-embed-text` (always) and `ollama pull qwen2.5:7b` (only if you'll answer locally).
 4. Optional: create a free API key on Groq for near-instant answers and transcription.
@@ -41,6 +46,8 @@ The name is Japanese: *hikui koe* (低い声) means "low voice", like someone wh
    project documentation, notes, data and questions you expect. The topic also helps transcription with proper names and technical terms. Scanned PDFs have no extractable text.
 2. **Settings**: answer and transcription providers. With a dedicated GPU and local Whisper, use `whisper-large-v3-turbo` (~1.5 GB).
 3. **Listen** (Ctrl+Shift+L) when the meeting starts.
+
+On macOS use Cmd instead of Ctrl.
 
 | Shortcut | Action |
 | --- | --- |
@@ -73,8 +80,9 @@ git tag v0.2.0
 git push origin v0.2.0
 ```
 
-The workflow takes the version from the tag, builds the installer on Windows and publishes it as a release with `HikuiKoe-Setup.exe`.
-Since the file name has no version in it, this link always points to the latest one:
+The workflow takes the version from the tag, builds the installers on Windows and macOS and publishes them in a single release
+(`HikuiKoe-Setup.exe`, `HikuiKoe-mac-arm64.dmg`, `HikuiKoe-mac-x64.dmg`).
+Since the file names have no version in them, links like this one always point to the latest release:
 `https://github.com/izzyll/hikuikoe/releases/latest/download/HikuiKoe-Setup.exe`.
 
 The installer is not signed: Windows SmartScreen will show a warning the first time ("More info → Run anyway").

@@ -1,5 +1,5 @@
-# Al subir un tag vX.Y.Z compila el instalador de Windows y lo publica como release de GitHub.
-# La landing enlaza a releases/latest/download/HikuiKoe-Setup.exe, que siempre apunta al último.
+# Al subir un tag vX.Y.Z compila los instaladores de Windows y macOS y los publica en un solo release de GitHub.
+# La landing enlaza a releases/latest/download/<archivo>, que siempre apunta al último.
 name: Release
 
 on:
@@ -10,8 +10,23 @@ permissions:
   contents: write
 
 jobs:
-  windows:
-    runs-on: windows-latest
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            script: dist
+            files: |
+              dist/HikuiKoe-Setup.exe
+              dist/HikuiKoe-Setup.exe.blockmap
+              dist/latest.yml
+          # Sin firma de Apple: se firma ad-hoc (identity "-") y el usuario debe quitar la cuarentena al instalar.
+          - os: macos-latest
+            script: dist:mac
+            files: |
+              dist/HikuiKoe-mac-arm64.dmg
+              dist/HikuiKoe-mac-x64.dmg
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -22,9 +37,24 @@ jobs:
       # La versión del instalador sale del tag (v0.2.0 → 0.2.0), así no hay que editar package.json a mano.
       - run: npm version "${GITHUB_REF_NAME#v}" --no-git-tag-version --allow-same-version
         shell: bash
-      # electron-builder solo compila: al publicar sube los archivos en paralelo y puede crear releases duplicados.
-      - run: npm run dist
-      - run: gh release create "$GITHUB_REF_NAME" dist/HikuiKoe-Setup.exe dist/HikuiKoe-Setup.exe.blockmap dist/latest.yml --title "$GITHUB_REF_NAME" --generate-notes
-        shell: bash
+      - run: npm run ${{ matrix.script }}
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.os }}
+          path: ${{ matrix.files }}
+          if-no-files-found: error
+
+  # Un solo `gh release create` con todos los archivos: si cada build publicara por su cuenta se crearían releases duplicados.
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - run: gh release create "$GITHUB_REF_NAME" dist/* --repo "$GITHUB_REPOSITORY" --title "$GITHUB_REF_NAME" --generate-notes
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
